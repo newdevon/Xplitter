@@ -1,6 +1,26 @@
 # XSplitter
 Split your Tabs/expenses/checks very easily :D
 
+## HOW TO RUN
+- Create virtual environment:
+```
+python3 -m venv env
+```
+- Activate venv:
+```
+env\Scripts\activate
+```
+- Install all packages needed:
+```
+pip install -r requirements.txt
+```
+
+## BEFORE COMMITTING
+- If you used new packages, put them into requirements.txt to let everyone know ;)
+```
+pip freeze > requirements.txt
+```
+
 ## User Interaction
 - 1:1 Human:CommandLine interaction
 - Input item by item
