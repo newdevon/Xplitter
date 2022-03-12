@@ -11,31 +11,31 @@
 
 
 from operator import truediv
+# from __future__ import division
 import sys
 import keyboard
 
 def namesInput():
-    name_input = input("Enter a name: ")
-    # while True:
-        # name_input = input("Enter a name: ")
-    #     if keyboard.is_pressed('q'):  # if key 'q' is pressed 
-    #             print('You Pressed A Key!')
-    #             break  # finishing the loop
+    names_list = []
+    while True:
+        name_input = input("Enter a payer's name | Type 'DONE' to proceed: ")
+        if name_input == "DONE": break
+        else: names_list.append(name_input)
 
+    return names_list
     
 
-def itemsInput():
-    names_list = ["Steven", "Joanne", "Jay", "Xuejin", "Sharon"]
+def itemsInput(names_list):
 
     items_dict = {} #items dictionary with (key, value) as (name, price)
 
     while True:
         item_name = input("What is the item? | Type 'DONE' to proceed: ")
-        if item_name == "DONE":
-            break
+        if item_name == "DONE": break
         else: #need to write cases for invalid inputs like non-intger values
             item_price = input(f"What is {item_name} price? ")
-            items_dict[item_name] = int(item_price)
+            items_dict[item_name] = float(item_price)
+            print(items_dict)
             divideToUser(item_name, items_dict, names_list)
         
     return items_dict
@@ -46,16 +46,23 @@ def divideToUser(item: str, items_dict: dict, names: list) -> list: #itemsList a
     for i in range(len(names)):
         print(f"{i+1}. {names[i]}")
     
+    who_list = []
+    number_of_people = len(names)
+
     name_string = input("Enter 0 for all | For specific people enter number seperated by white space: ")
     if name_string == "0":
-        print("Dividing evenly to every person! Waiting for implementation...")
-    else:    
-        who_list = list(map(int, name_string.split())) #list of string converted to integers 
+        who_list = names
+    else:
+        for char in name_string:
+            if char.isdigit():
+                index = int(char)
+                who_list.append(names[index - 1])
+        number_of_people = len(who_list)
  
-    even_divison = int(items_dict[item] / len(who_list))
+    even_divison = items_dict[item] / number_of_people
     
-    for j in range(len(who_list)):
-        print(f"{names[who_list[j]-1]} owes ${even_divison}!")
+    for j in range(number_of_people):
+        print(f"{who_list[j]} owes ${even_divison}!")
     return even_divison
 
 def splitCheck():
@@ -65,7 +72,7 @@ def splitCheck():
     title = input("Enter file title:")
     print(title)
     
-    # namesInput()
+    names_list = namesInput()
+    items_dict = itemsInput(names_list)
 
-    items_dict = itemsInput()
     print(items_dict)
