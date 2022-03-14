@@ -16,6 +16,7 @@ from operator import truediv
 from datetime import datetime
 import sys
 import keyboard
+import csv
 
 class MinimumValueError(Exception): pass #handles: no inputs
 class UnwantedStringError(Exception): pass #handles: bad strings in int inputs
@@ -44,34 +45,41 @@ def namesInput(user_total):
     return names_list
 
 
-def itemsInput(names_list, user_total):
+def itemsInput(names_list, user_total, tab):
     items_dict = {} #items dictionary with (key, value) as (name, price)
 
     while True:
         try:
-            item_name = input("What is the item? | Type 'DONE' to proceed: ")
-            if item_name == "DONE": 
+            item_input = input("What is the item? | Type 'DONE' to proceed: ")
+            if item_input == "DONE": 
                 if len(items_dict) == 0: 
                     raise MinimumValueError
                 break
+            elif item_input == "" or item_input == " " or item_input.isdigit():
+                raise ErrorInput
 
-            item_price = input(f"What is {item_name} price? ")
-            items_dict[item_name] = float(item_price)
-            divideToUser(item_name, items_dict, names_list, user_total)
+            item_price = input(f"What is {item_input} price? ")
+            items_dict[item_input] = float(item_price)
+            divideToUser(item_input, items_dict, names_list, user_total, tab)
 
         except ValueError:
             print("Enter a number for item price!")
         except MinimumValueError:
             print("Insert at least 1 item to continue!")
+        except ErrorInput:
+            print("Enter a valid name")
 
     return items_dict
 
 
-def divideToUser(item: str, items_dict: dict, names: list, user_total: dict) -> list: #itemsList and namesList parameter
+def divideToUser(item: str, items_dict: dict, names: list, user_total: dict, tab: list) -> list: #itemsList and namesList parameter
     print("\033[96m" + "WHO " + item + "?" + "\033[0m")
     
     for i in range(len(names)):
         print(f"{i+1}. {names[i]}")
+    
+    
+    #who_list = [0] * len(names)
     
     who_list = []
     number_of_people = len(names)
@@ -85,18 +93,28 @@ def divideToUser(item: str, items_dict: dict, names: list, user_total: dict) -> 
                 for char in name_string:
                     if char.isdigit():
                         index = int(char)
+                        if index < 0 or index > number_of_people:
+                            raise ValueError
                         who_list.append(names[index - 1])
+                        #who_list[index-1] 
                 number_of_people = len(who_list)
                 if number_of_people == 0:
                     raise UnwantedStringError
             break
         
+        
+        except ValueError:
+            print("Enter a valid number!")
         except UnwantedStringError:
             print("Please enter a number for name selection!")
     
     even_divison = items_dict[item] / number_of_people
     for j in range(number_of_people):
         user_total[who_list[j]] += even_divison #updates running total between everyone
+
+        '''trying to do this, we need to create a list with (the # of users) dictionaries'''
+        #tab[j[item]] = even_divison 
+
         print(f"{who_list[j]} owes ${even_divison}!")
 
     return
@@ -111,7 +129,30 @@ def splitCheck():
     print(title)
     
     names_list = namesInput(user_total)
-    items_dict = itemsInput(names_list, user_total)
+    running_tab = [{'User': name} for name in names_list]
+
+    items_dict = itemsInput(names_list, user_total, running_tab)
 
     print(items_dict)
     print(user_total)
+
+    field_names = ["User"]
+
+    for item in items_dict:
+        field_names.append(item)
+
+    print(field_names)
+
+    print(running_tab)
+
+    # for users in user_total: # user_total: {'Joanne': 0, 'Steven': 100.0}
+    #     for field in field_names: # field_names: ['Payers', 'fries', 'drinks']
+    #         running_tab.append({field})
+
+    # {'Users': Steven, 'Fries': '2', 'Car Rental': '40', 'Total':''}
+    '''
+    I think I need to do it in seperate functions, I don't think I can loop through to create this structure
+    One function should only append the Users key
+    Another function should only keep adding item keys: This should be done when we add items to tab
+    The lasy function should add the total key
+    '''
