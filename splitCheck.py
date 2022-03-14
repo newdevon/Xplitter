@@ -79,10 +79,10 @@ def divideToUser(item: str, items_dict: dict, names: list, user_total: dict, tab
         print(f"{i+1}. {names[i]}")
     
     
-    #who_list = [0] * len(names)
-    
+    user_prices = [0] * len(names)
     who_list = []
     number_of_people = len(names)
+    name_string = ""
     
     while True:
         try: 
@@ -96,7 +96,7 @@ def divideToUser(item: str, items_dict: dict, names: list, user_total: dict, tab
                         if index < 0 or index > number_of_people:
                             raise ValueError
                         who_list.append(names[index - 1])
-                        #who_list[index-1] 
+                        
                 number_of_people = len(who_list)
                 if number_of_people == 0:
                     raise UnwantedStringError
@@ -109,13 +109,23 @@ def divideToUser(item: str, items_dict: dict, names: list, user_total: dict, tab
             print("Please enter a number for name selection!")
     
     even_divison = items_dict[item] / number_of_people
-    for j in range(number_of_people):
-        user_total[who_list[j]] += even_divison #updates running total between everyone
 
-        '''trying to do this, we need to create a list with (the # of users) dictionaries'''
-        #tab[j[item]] = even_divison 
+    if name_string == "0":
+        for i in range(len(user_prices)):
+            user_prices[i] = even_divison
+    else:
+        for i in range(len(name_string)):
+            if name_string[i].isdigit():
+                user_prices[int(name_string[i]) - 1] = even_divison
+            
+    print(user_prices)
 
-        print(f"{who_list[j]} owes ${even_divison}!")
+    for j in range(len(user_prices)):
+        tab[j][item] = user_prices[j]
+
+    for k in range(number_of_people):
+        user_total[who_list[k]] += even_divison #updates running total between everyone
+        print(f"{who_list[k]} owes ${even_divison}!")
 
     return
 
@@ -133,26 +143,23 @@ def splitCheck():
 
     items_dict = itemsInput(names_list, user_total, running_tab)
 
-    print(items_dict)
-    print(user_total)
+    # print(items_dict)
+    # print(user_total)
 
     field_names = ["User"]
-
     for item in items_dict:
         field_names.append(item)
+    field_names.append("Total")
 
-    print(field_names)
+    i = 0
+    for key in user_total:
+        running_tab[i]["Total"] = user_total[key]
+        i += 1
 
     print(running_tab)
 
-    # for users in user_total: # user_total: {'Joanne': 0, 'Steven': 100.0}
-    #     for field in field_names: # field_names: ['Payers', 'fries', 'drinks']
-    #         running_tab.append({field})
-
-    # {'Users': Steven, 'Fries': '2', 'Car Rental': '40', 'Total':''}
-    '''
-    I think I need to do it in seperate functions, I don't think I can loop through to create this structure
-    One function should only append the Users key
-    Another function should only keep adding item keys: This should be done when we add items to tab
-    The lasy function should add the total key
-    '''
+    file_name = input("What would you like to name your CSV file? ") + '.csv'
+    with open(file_name, 'w') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames = field_names)
+        writer.writeheader()
+        writer.writerows(running_tab)
